@@ -5,19 +5,20 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Chat2
 {
     internal class Server
     {
-        //public Dictionary<string, IPEndPoint> clients = new Dictionary<string, IPEndPoint>();
         public HashSet<TcpClient> clients = new HashSet<TcpClient>();
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
         public void Run()
         {
             listener.Start();
             Console.WriteLine("Сервер запущен");
+            int count = 0;
             while (true)
             {
                 var client = listener.AcceptTcpClient();
@@ -27,23 +28,23 @@ namespace Chat2
                     var stream = client.GetStream();
                     using (StreamReader reader = new StreamReader(stream))
                     {
-                        //string message = reader.ReadToEnd();  Ошибка где-то здесь...
-                        //Console.WriteLine(message);
-                        Task.Run(async() =>
+                        using (StreamWriter writer = new StreamWriter(stream))
                         {
-                            using (StreamWriter writer = new StreamWriter(stream))
+                            try
                             {
-                                Console.WriteLine("Код дошел сюда");
-                                await writer.WriteLineAsync("Сообщение получено");
-                                Console.WriteLine("И сюда");
+                                string msg = reader.ReadLine(); // Ошибка в этой строке...
+                                Console.WriteLine(msg);
+                                writer.WriteLine("Сообщение получено");
                             }
-                        }).Wait();
-                    }                       
+                            finally { Console.Write("_"); }
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.ToString());
                 }
+                Console.WriteLine(++count);
             }
         }
     }
