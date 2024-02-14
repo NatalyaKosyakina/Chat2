@@ -16,7 +16,7 @@ namespace Chat2
                 Thread listen = new Thread(() =>
                 {
                     Server server = new Server();
-                    server.Run2();
+                    server.Run();
                 });
                 listen.Start();
             }
@@ -25,7 +25,7 @@ namespace Chat2
                 Thread send = new Thread(() =>
                 {
                     Client client = new Client();
-                    client.Run3();
+                    client.Run();
                 });
                 send.Start();
             }
