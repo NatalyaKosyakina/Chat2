@@ -22,11 +22,19 @@ namespace Chat2
             {
                 var client = listener.AcceptTcpClient();
                 clients.Add(client);
-                var stream = client.GetStream();
-                StreamReader reader = new StreamReader(stream);
-                Console.WriteLine(reader.ReadToEnd());
-                //StreamWriter writer = new StreamWriter(stream);
-
+                try
+                {
+                    var stream = client.GetStream();
+                    StreamReader reader = new StreamReader(stream);
+                    string message = reader.ReadToEnd();
+                    Console.WriteLine(message);
+                    StreamWriter writer = new StreamWriter(stream);
+                    writer.WriteLine("Сообщение получено");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
     }

@@ -15,23 +15,35 @@ namespace Chat2
     {
         public void Run() {
             TcpClient client = new TcpClient();
-            client.Connect("127.0.0.1", 5555);
-            var stream = client.GetStream();
-            while (true)
+            try
             {
-                Console.WriteLine("Введите сообщение: ");
-                string info = Console.ReadLine();
-                if (string.IsNullOrEmpty(info))
+                client.Connect("127.0.0.1", 5555);
+                var stream = client.GetStream();
+                while (true)
                 {
-                    break;
-                }
-                else
-                {
-                    using (StreamWriter sw = new StreamWriter(stream))
+                    Console.WriteLine("Введите сообщение: ");
+                    string info = Console.ReadLine();
+                    if (string.IsNullOrEmpty(info))
                     {
-                        sw.WriteLine(info);
+                        break;
                     }
+                    else
+                    {
+                        using (StreamWriter sw = new StreamWriter(stream))
+                        {
+                            sw.WriteLine(info);
+                            //using (StreamReader sr = new StreamReader(stream))
+                            //{
+                            //    Console.WriteLine(sr.ReadToEnd());
+                            //}
+                        }
+                    }
+
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
