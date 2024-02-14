@@ -25,11 +25,20 @@ namespace Chat2
                 try
                 {
                     var stream = client.GetStream();
-                    StreamReader reader = new StreamReader(stream);
-                    string message = reader.ReadToEnd();
-                    Console.WriteLine(message);
-                    StreamWriter writer = new StreamWriter(stream);
-                    writer.WriteLine("Сообщение получено");
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        //string message = reader.ReadToEnd();  Ошибка где-то здесь...
+                        //Console.WriteLine(message);
+                        Task.Run(async() =>
+                        {
+                            using (StreamWriter writer = new StreamWriter(stream))
+                            {
+                                Console.WriteLine("Код дошел сюда");
+                                await writer.WriteLineAsync("Сообщение получено");
+                                Console.WriteLine("И сюда");
+                            }
+                        }).Wait();
+                    }                       
                 }
                 catch (Exception ex)
                 {
