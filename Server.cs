@@ -12,39 +12,69 @@ namespace Chat2
 {
     internal class Server
     {
-        public HashSet<TcpClient> clients = new HashSet<TcpClient>();
+        public HashSet<ClientEx> clients = new HashSet<ClientEx>();
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
+        bool flag = true;
+
         public void Run()
         {
-            listener.Start();
-            Console.WriteLine("Сервер запущен");
-            int count = 0;
-            while (true)
+            try
             {
-                var client = listener.AcceptTcpClient();
-                clients.Add(client);
+                listener.Start();
+                Console.WriteLine("Сервер запущен");
+                ClientEx client = null;
+
+                new Thread(() =>
+                {
+                    Console.ReadKey();
+                    flag = false;
+                    client = null;
+                    Stop();
+                    Console.WriteLine("Работа сервера завершена");
+                }).Start();
+                while (flag)
+                {
+                    client = new ClientEx(listener.AcceptTcpClient());
+                    if (client == null) { break; }
+                    clients.Add(client);
+                    new Thread(() => { client.Listen(); }).Start();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+            finally
+            {
+                Stop();
+            }
+        }
+        private void Stop()
+        {
+            foreach (var client in clients)
+            {
+                SendToAll("Работа сервера завершена");
+                client.Close();
+            }
+            listener.Stop();
+        }
+
+        private void SendToAll(string message, List<ClientEx> except = null)
+        {
+            foreach (var item in clients)
+            {
                 try
                 {
-                    var stream = client.GetStream();
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (except == null || except.Contains(item))
                     {
-                        using (StreamWriter writer = new StreamWriter(stream))
-                        {
-                            try
-                            {
-                                string msg = reader.ReadLine(); // Ошибка в этой строке...
-                                Console.WriteLine(msg);
-                                writer.WriteLine("Сообщение получено");
-                            }
-                            finally { Console.Write("_"); }
-                        }
+                        continue;
+                    }
+                    else
+                    {
+                        item.sendMessage(message);
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.ToString());
-                }
-                Console.WriteLine(++count);
+                catch { }
             }
         }
     }

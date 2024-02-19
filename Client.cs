@@ -13,82 +13,52 @@ namespace Chat2
 {
     internal class Client
     {
+        StreamReader reader = null;
+        StreamWriter writer = null;
+
         public void Run() {
-            TcpClient client = new TcpClient();
-            try
+            using (TcpClient client = new TcpClient())
             {
-                client.Connect("127.0.0.1", 5555);
-                var stream = client.GetStream();
-                using (StreamWriter writer = new StreamWriter(stream))
+                try
                 {
-                    using (StreamReader reader = new StreamReader(stream))
+                    client.Connect("127.0.0.1", 5555);
+                    reader = new StreamReader(client.GetStream());
+                    writer = new StreamWriter(client.GetStream());
+                    if (reader != null && writer != null)
                     {
                         while (true)
                         {
                             Console.WriteLine("Введите сообщение: ");
                             string info = Console.ReadLine();
-                            if (string.IsNullOrEmpty(info))
+                            if (string.IsNullOrEmpty(info) || info.Equals("Exit"))
                             {
                                 break;
                             }
                             else
                             {
                                 writer.WriteLine(info);
-                                Task.Run(async () =>
-                                {
-                                    Console.WriteLine(await reader.ReadLineAsync());
-                                }).Wait();
+                                writer.Flush();
                             }
+                            new Thread(() => 
+                            { 
+                                try
+                                {
+                                    Console.WriteLine(reader.ReadLine());
+                                }
+                                catch { }
+                            }).Start();
+                            Thread.Sleep(100);
                         }
                     }
                 }
-               
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-        }
-
-
-        public void Run2()
-        {
-            TcpClient client = new TcpClient();
-            try
-            {
-                client.Connect("127.0.0.1", 5555);
-                var stream = client.GetStream();
-                //Stream second = new MemoryStream();
-                //stream.CopyTo(second);
-                while (true)
-                {
-
-                    Console.WriteLine("Введите сообщение: ");
-                    string info = Console.ReadLine();
-                    if (string.IsNullOrEmpty(info))
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        //using (StreamWriter writer = new StreamWriter(stream))
-                        //{
-                        //    writer.WriteLine(info);
-                        //}
-                        Task.Run(async () =>
-                        {
-                            using (StreamReader sr = new StreamReader(stream))
-                            {
-                                Console.WriteLine(await sr.ReadLineAsync());
-                            }
-                        });
-                    }
-
+                catch (System.IO.IOException) {
+                    Console.WriteLine("Работа сервера была завершена");
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+                reader.Close();
             }
         }
     }
