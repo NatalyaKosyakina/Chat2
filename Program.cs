@@ -13,21 +13,22 @@ namespace Chat2
         {
             if (args.Length == 0)
             {
-                Thread listen = new Thread(() =>
-                {
-                    Server server = new Server();
-                    server.Run();
-                });
-                listen.Start();
-            }
-            else
-            {
                 Thread send = new Thread(() =>
                 {
                     Client client = new Client();
                     client.Run();
                 });
                 send.Start();
+                
+            }
+            else
+            {
+                Thread listen = new Thread(() =>
+                {
+                    Server server = new Server();
+                    server.Run();
+                });
+                listen.Start();
             }
         }
     }

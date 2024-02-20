@@ -22,38 +22,28 @@ namespace Chat2
             writer = new StreamWriter(stream);
         }
 
-        public void Listen()
-        {
-            string info = "-1";
-            try
-            {
-                while (true)
-                {
-                    try
-                    {
-                        info = reader.ReadLine();
-                        Console.WriteLine(info);
-                        writer.WriteLine("Сообщение получено");
-                        writer.Flush();
-                    }
-                    catch
-                    {
-                        break;
-                    }
-                }
-            }
-            catch (Exception e){ Console.WriteLine(e.Message); }
-        }
-        public void sendMessage(string message)
+        public void SendMessage(string message)
         {
             try
             {
-                writer.WriteLine(message);
+                writer.WriteLine();
                 writer.Flush();
             }
-            catch { }
+            catch (Exception e) 
+            {
+                Console.WriteLine(e.Message); 
+            }
         }
 
+        public async Task Listen()
+        {
+            try
+            {
+                string info = await reader.ReadLineAsync();
+                Console.WriteLine(info);
+            }
+            catch (Exception) { throw; }
+        }
         public void Close()
         {
             writer.Close();

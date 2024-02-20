@@ -16,7 +16,7 @@ namespace Chat2
         StreamReader reader = null;
         StreamWriter writer = null;
 
-        public void Run() {
+        public async void Run() {
             using (TcpClient client = new TcpClient())
             {
                 try
@@ -28,6 +28,7 @@ namespace Chat2
                     {
                         while (true)
                         {
+                            Thread.Sleep(100);
                             Console.WriteLine("Введите сообщение: ");
                             string info = Console.ReadLine();
                             if (string.IsNullOrEmpty(info) || info.Equals("Exit"))
@@ -38,16 +39,8 @@ namespace Chat2
                             {
                                 writer.WriteLine(info);
                                 writer.Flush();
+                                Console.WriteLine(reader.ReadLine());
                             }
-                            new Thread(() => 
-                            { 
-                                try
-                                {
-                                    Console.WriteLine(reader.ReadLine());
-                                }
-                                catch { }
-                            }).Start();
-                            Thread.Sleep(100);
                         }
                     }
                 }
@@ -58,7 +51,7 @@ namespace Chat2
                 {
                     Console.WriteLine(ex.ToString());
                 }
-                reader.Close();
+                finally { reader?.Dispose(); }
             }
         }
     }

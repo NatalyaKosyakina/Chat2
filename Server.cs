@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,7 +17,7 @@ namespace Chat2
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
         bool flag = true;
 
-        public void Run()
+        public async void Run()
         {
             try
             {
@@ -37,7 +38,23 @@ namespace Chat2
                     client = new ClientEx(listener.AcceptTcpClient());
                     if (client == null) { break; }
                     clients.Add(client);
-                    new Thread(() => { client.Listen(); }).Start();
+                    new Thread(async () =>
+                    {
+                        try
+                        {
+                            while (true)
+                            {
+                                await client.Listen();
+                                client.SendMessage("Сообщение получено");
+                            }
+                        }
+                        catch (System.IO.IOException) 
+                        {
+                            await Console.Out.WriteLineAsync("Клиент вышел из чата"); 
+                            clients.Remove(client);
+                        }                        
+                    }).Start();
+                    
                 }
             }
             catch (Exception e)
@@ -71,11 +88,12 @@ namespace Chat2
                     }
                     else
                     {
-                        item.sendMessage(message);
+                        item.SendMessage(message);
                     }
                 }
                 catch { }
             }
         }
+       
     }
 }
