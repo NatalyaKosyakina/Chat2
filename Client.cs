@@ -16,7 +16,7 @@ namespace Chat2
         StreamReader reader = null;
         StreamWriter writer = null;
 
-        public async void Run() {
+        public void Run() {
             using (TcpClient client = new TcpClient())
             {
                 try

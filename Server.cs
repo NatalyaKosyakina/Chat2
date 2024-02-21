@@ -16,6 +16,7 @@ namespace Chat2
         public HashSet<ClientEx> clients = new HashSet<ClientEx>();
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
         bool flag = true;
+        CancellationTokenSource cts = new CancellationTokenSource();
 
         public async void Run()
         {
@@ -30,30 +31,31 @@ namespace Chat2
                     Console.ReadKey();
                     flag = false;
                     client = null;
+                    cts.Cancel();
                     Stop();
                     Console.WriteLine("Работа сервера завершена");
                 }).Start();
-                while (flag)
+                while (!cts.Token.IsCancellationRequested)
                 {
                     client = new ClientEx(listener.AcceptTcpClient());
-                    if (client == null) { break; }
+                    if (client == null || cts.Token.IsCancellationRequested) { break; }
                     clients.Add(client);
-                    new Thread(async () =>
+                    await Task.Run(() =>
                     {
                         try
                         {
                             while (true)
                             {
-                                await client.Listen();
+                                client.Listen();
                                 client.SendMessage("Сообщение получено");
                             }
                         }
                         catch (System.IO.IOException) 
                         {
-                            await Console.Out.WriteLineAsync("Клиент вышел из чата"); 
+                            Console.WriteLine("Клиент вышел из чата"); 
                             clients.Remove(client);
                         }                        
-                    }).Start();
+                    });
                     
                 }
             }

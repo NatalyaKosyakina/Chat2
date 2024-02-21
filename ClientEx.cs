@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Chat2
@@ -13,6 +14,8 @@ namespace Chat2
         TcpClient client;
         StreamReader reader;
         StreamWriter writer;
+        //CancellationToken ct;
+
 
         public ClientEx(TcpClient client)
         {
@@ -20,13 +23,31 @@ namespace Chat2
             var stream = client.GetStream();
             reader = new StreamReader(stream);
             writer = new StreamWriter(stream);
+            //this.ct = ct;
         }
+
+        //public void SimpleWork()
+        //{
+        //    while ()
+        //    {
+        //        try
+        //        {
+        //            writer.WriteLine();
+        //            writer.Flush();
+        //        }
+        //        catch (Exception e)
+        //        {
+        //            Console.WriteLine(e.Message);
+        //        }
+        //    }
+        //}
+
 
         public void SendMessage(string message)
         {
             try
             {
-                writer.WriteLine();
+                writer.WriteLine(message);
                 writer.Flush();
             }
             catch (Exception e) 
@@ -35,12 +56,11 @@ namespace Chat2
             }
         }
 
-        public async Task Listen()
+        public void Listen()
         {
             try
             {
-                string info = await reader.ReadLineAsync();
-                Console.WriteLine(info);
+                Console.WriteLine(reader.ReadLine());
             }
             catch (Exception) { throw; }
         }
