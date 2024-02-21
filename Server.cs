@@ -40,23 +40,23 @@ namespace Chat2
                     client = new ClientEx(listener.AcceptTcpClient());
                     if (client == null || cts.Token.IsCancellationRequested) { break; }
                     clients.Add(client);
-                    await Task.Run(() =>
+                    new Thread(async () =>
                     {
                         try
                         {
-                            while (true)
+                            while (!cts.Token.IsCancellationRequested)
                             {
                                 client.Listen();
-                                client.SendMessage("Сообщение получено");
+                                await client.SendMessageAsync("Сообщение получено");
                             }
                         }
-                        catch (System.IO.IOException) 
+                        catch (System.IO.IOException e) 
                         {
+                            Console.WriteLine(e.Message);
                             Console.WriteLine("Клиент вышел из чата"); 
                             clients.Remove(client);
                         }                        
-                    });
-                    
+                    }).Start();
                 }
             }
             catch (Exception e)

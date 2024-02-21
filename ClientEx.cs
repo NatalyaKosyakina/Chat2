@@ -23,26 +23,19 @@ namespace Chat2
             var stream = client.GetStream();
             reader = new StreamReader(stream);
             writer = new StreamWriter(stream);
-            //this.ct = ct;
         }
 
-        //public void SimpleWork()
-        //{
-        //    while ()
-        //    {
-        //        try
-        //        {
-        //            writer.WriteLine();
-        //            writer.Flush();
-        //        }
-        //        catch (Exception e)
-        //        {
-        //            Console.WriteLine(e.Message);
-        //        }
-        //    }
-        //}
 
-
+        public async Task SimpleWork(string message, CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                string msg = await reader.ReadLineAsync();
+                await Console.Out.WriteLineAsync(msg);
+                await writer.WriteLineAsync(message);
+                await writer.FlushAsync();
+            }
+        }
         public void SendMessage(string message)
         {
             try
@@ -56,13 +49,26 @@ namespace Chat2
             }
         }
 
+        public async Task SendMessageAsync(string message)
+        {
+            try
+            {
+                await writer.WriteLineAsync(message);
+                writer.Flush();
+            }
+            catch (Exception e)
+            {
+                throw new System.IO.IOException(e.Message);
+            }
+        }
+
         public void Listen()
         {
             try
             {
                 Console.WriteLine(reader.ReadLine());
             }
-            catch (Exception) { throw; }
+            catch { }
         }
         public void Close()
         {
