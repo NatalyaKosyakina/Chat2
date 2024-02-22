@@ -68,7 +68,7 @@ namespace Chat2
             {
                 Console.WriteLine(reader.ReadLine());
             }
-            catch { }
+            catch (Exception e) { throw new System.IO.IOException(e.Message); }
         }
         public void Close()
         {

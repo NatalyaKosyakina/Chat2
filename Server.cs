@@ -15,10 +15,9 @@ namespace Chat2
     {
         public HashSet<ClientEx> clients = new HashSet<ClientEx>();
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
-        bool flag = true;
         CancellationTokenSource cts = new CancellationTokenSource();
 
-        public async void Run()
+        public void Run()
         {
             try
             {
@@ -29,7 +28,6 @@ namespace Chat2
                 new Thread(() =>
                 {
                     Console.ReadKey();
-                    flag = false;
                     client = null;
                     cts.Cancel();
                     Stop();
@@ -40,22 +38,23 @@ namespace Chat2
                     client = new ClientEx(listener.AcceptTcpClient());
                     if (client == null || cts.Token.IsCancellationRequested) { break; }
                     clients.Add(client);
-                    new Thread(async () =>
+                    new Thread(() =>
                     {
-                        try
+                        while (!cts.Token.IsCancellationRequested)
                         {
-                            while (!cts.Token.IsCancellationRequested)
+                            try
                             {
                                 client.Listen();
-                                await client.SendMessageAsync("Сообщение получено");
+                                client.SendMessage("Сообщение получено");
+                            }
+                            catch (System.IO.IOException)
+                            {
+                                Console.WriteLine("Клиент вышел из чата");
+                                clients.Remove(client);
+                                break;
                             }
                         }
-                        catch (System.IO.IOException e) 
-                        {
-                            Console.WriteLine(e.Message);
-                            Console.WriteLine("Клиент вышел из чата"); 
-                            clients.Remove(client);
-                        }                        
+                        
                     }).Start();
                 }
             }
