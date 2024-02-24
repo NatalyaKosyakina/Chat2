@@ -14,7 +14,6 @@ namespace Chat2
         TcpClient client;
         StreamReader reader;
         StreamWriter writer;
-        //CancellationToken ct;
 
 
         public ClientEx(TcpClient client)

@@ -16,6 +16,7 @@ namespace Chat2
         public HashSet<ClientEx> clients = new HashSet<ClientEx>();
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
         CancellationTokenSource cts = new CancellationTokenSource();
+        private Mode _mode = null;
 
         public void Run()
         {
@@ -27,11 +28,29 @@ namespace Chat2
 
                 new Thread(() =>
                 {
-                    Console.ReadKey();
-                    client = null;
-                    cts.Cancel();
-                    Stop();
-                    Console.WriteLine("Работа сервера завершена");
+                    while (true)
+                    {
+                        string input = Console.ReadLine();
+                        if (string.IsNullOrEmpty(input))
+                        {
+                            client = null;
+                            cts.Cancel();
+                            Stop();
+                            Console.WriteLine("Работа сервера завершена");
+                            break;
+                        }
+                        else
+                        {
+                            if (input.Equals("Mode1"))
+                            {
+                                TransitionTo(new Mode1());
+                            }
+                            if (input.Equals("Mode2"))
+                            {
+                                TransitionTo(new Mode2());
+                            }
+                        }
+                    }
                 }).Start();
                 while (!cts.Token.IsCancellationRequested)
                 {
@@ -94,6 +113,13 @@ namespace Chat2
                 }
                 catch { }
             }
+        }
+
+        public void TransitionTo(Mode mode)
+        {
+            Console.WriteLine($"Context: Transition to {mode.GetType().Name}.");
+            _mode = mode;
+            _mode.SetServer(this);
         }
        
     }
