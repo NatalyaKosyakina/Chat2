@@ -15,8 +15,8 @@ namespace Chat2
     {
         StreamReader reader = null;
         StreamWriter writer = null;
-
-        public void Run() {
+        CancellationTokenSource cts = new CancellationTokenSource();
+        public async Task Run() {
             using (TcpClient client = new TcpClient())
             {
                 try
@@ -24,23 +24,38 @@ namespace Chat2
                     client.Connect("127.0.0.1", 5555);
                     reader = new StreamReader(client.GetStream());
                     writer = new StreamWriter(client.GetStream());
+                    string infoTo = "-1";
+                    bool flag = true;
                     if (reader != null && writer != null)
                     {
-                        while (true)
+                        while (!cts.IsCancellationRequested && flag)
                         {
                             Thread.Sleep(100);
                             Console.WriteLine("Введите сообщение: ");
-                            string info = Console.ReadLine();
-                            if (string.IsNullOrEmpty(info) || info.Equals("Exit"))
+                             infoTo = Console.ReadLine();
+                            Task.Run(() => 
                             {
-                                break;
-                            }
-                            else
-                            {
-                                writer.WriteLine(info);
-                                writer.Flush();
-                                Console.WriteLine(reader.ReadLine());
-                            }
+                                if (string.IsNullOrEmpty(infoTo) || infoTo.Equals("Exit"))
+                                {
+                                    flag = false;
+                                    cts.Cancel();
+                                }
+                                else
+                                {
+                                    writer.WriteLine(infoTo);
+                                    writer.Flush();
+                                    string msgFromServer = reader.ReadLine();
+                                    if (msgFromServer != null)
+                                    {
+                                        Console.WriteLine(msgFromServer);
+                                    }
+                                    else 
+                                    {
+                                        Console.WriteLine("Работа сервера была завершена");
+                                        cts.Cancel();
+                                    }
+                                }
+                            });
                         }
                     }
                 }

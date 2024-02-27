@@ -22,10 +22,10 @@ namespace Chat2
             }
             else
             {
-                Thread send = new Thread(() =>
+                Thread send = new Thread(async() =>
                 {
                     Client client = new Client();
-                    client.Run();
+                    await client.Run();
                 });
                 send.Start();
             }

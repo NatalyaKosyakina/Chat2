@@ -16,7 +16,7 @@ namespace Chat2
         public HashSet<ClientEx> clients = new HashSet<ClientEx>();
         public TcpListener listener = new TcpListener(IPAddress.Any, 5555);
         CancellationTokenSource cts = new CancellationTokenSource();
-        private Mode _mode = null;
+        private Mode _mode = new Mode1();
 
         public void Run()
         {
@@ -65,6 +65,7 @@ namespace Chat2
                             {
                                 client.Listen();
                                 client.SendMessage("Сообщение получено");
+                                SomeRequest();
                             }
                             catch (System.IO.IOException)
                             {
@@ -120,6 +121,11 @@ namespace Chat2
             Console.WriteLine($"Context: Transition to {mode.GetType().Name}.");
             _mode = mode;
             _mode.SetServer(this);
+        }
+
+        public void SomeRequest()
+        {
+            _mode.Handle1();
         }
        
     }

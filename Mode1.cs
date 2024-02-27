@@ -10,12 +10,7 @@ namespace Chat2
     {
         public override void Handle1()
         {
-            throw new NotImplementedException();
-        }
-
-        public override void Handle2()
-        {
-            throw new NotImplementedException();
+            Console.WriteLine("Первый вариант некой дополнительной функции.");
         }
     }
 }

@@ -16,6 +16,5 @@ namespace Chat2
         }
 
         public abstract void Handle1();
-        public abstract void Handle2();
     }
 }
